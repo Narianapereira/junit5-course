@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvFileSource;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
@@ -55,11 +56,7 @@ class UserTest {
     }
 
     @ParameterizedTest(name = "{4}")
-    @CsvSource(value = {
-            "1, NULL,user@gmail.com, 123456, Username cannot be null or empty",
-            "1, Valid User, NULL, 123456, Email cannot be null or empty",
-            "1, Valid User,user@gmail.com, NULL, Password cannot be null or empty"},
-    nullValues = "NULL")
+    @CsvFileSource(files = "src//test//java//userfields.csv", nullValues = "NULL", numLinesToSkip = 1)
     public void shouldCreateUser(Long id, String username, String email, String password, String message) {
         ValidationException exception = Assertions.assertThrows(ValidationException.class, () ->
                 UserBuilder.oneUser().withId(id).withUsername(username).withEmail(email).withPassword(password).readyToUse()

@@ -1,0 +1,4 @@
+Id, Username, Email, Password, Message
+1, NULL,user@gmail.com, 123456, Username cannot be null or empty
+1, Valid User, NULL, 123456, Email cannot be null or empty
+1, Valid User,user@gmail.com, NULL, Password cannot be null or empty
