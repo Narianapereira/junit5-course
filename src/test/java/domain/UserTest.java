@@ -8,6 +8,9 @@ import domain.exceptions.ValidationException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 @DisplayName("Domain: User")
 class UserTest {
@@ -49,6 +52,19 @@ class UserTest {
                 UserBuilder.oneUser().withPassword(null).readyToUse()
         );
         assertEquals("Password cannot be null or empty", exception.getMessage());
+    }
+
+    @ParameterizedTest(name = "{4}")
+    @CsvSource(value = {
+            "1, NULL,user@gmail.com, 123456, Username cannot be null or empty",
+            "1, Valid User, NULL, 123456, Email cannot be null or empty",
+            "1, Valid User,user@gmail.com, NULL, Password cannot be null or empty"},
+    nullValues = "NULL")
+    public void shouldCreateUser(Long id, String username, String email, String password, String message) {
+        ValidationException exception = Assertions.assertThrows(ValidationException.class, () ->
+                UserBuilder.oneUser().withId(id).withUsername(username).withEmail(email).withPassword(password).readyToUse()
+        );
+        assertEquals(message, exception.getMessage());
     }
 
 }

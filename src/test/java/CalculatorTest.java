@@ -1,5 +1,8 @@
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,13 +15,13 @@ public class CalculatorTest {
     public void shouldReturnDecimalOnDivision(){
         calculator = new Calculator();
         float result = calculator.division(10,3);
-        //Assertions.assertEquals(3.33, result, 0.33);
+        Assertions.assertEquals(3.3333332538604736, result);
     }
 
     @Test
     public void shouldReturnZeroOnZeroNumerator(){
         calculator = new Calculator();
-        float result = calculator.division(6,10);
+        float result = calculator.division(0,6);
         Assertions.assertEquals(0, result);
     }
 
@@ -26,7 +29,7 @@ public class CalculatorTest {
     public void shouldThrowExceptionOnDivisionByZero(){
         ArithmeticException exeption = Assertions.assertThrows(ArithmeticException.class, () -> {
             calculator = new Calculator();
-            float result = calculator.division(6,0);
+            float result = calculator.division(10,0);
         });
         Assertions.assertEquals("/ by zero", exeption.getMessage());
     }
@@ -47,6 +50,25 @@ public class CalculatorTest {
         List<String> s1 = new ArrayList<>();
         List<String> s2 = new ArrayList<>();
         List<String> s3 = new ArrayList<>();
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"Teste1", "Teste2"})
+    public void testStrings(String param){
+        System.out.println(param);
+        Assertions.assertNotNull(param);
+    }
+
+    @ParameterizedTest
+    @CsvSource(value = {
+            "6,2,3",
+            "6, -2, -3",
+            "10, 3, 3.3333332538604736",
+            "0,2,0"})
+    public void shouldDivideCorrectly(int num, int den, double finalResult){
+        calculator = new Calculator();
+        double result = calculator.division(num, den);
+        Assertions.assertEquals(finalResult, result);
     }
 
 }
