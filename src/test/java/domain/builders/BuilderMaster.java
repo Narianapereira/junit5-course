@@ -1,5 +1,6 @@
 package domain.builders;
 
+import domain.Account;
 import domain.User;
 
 import static java.lang.String.format;
@@ -137,6 +138,6 @@ public class BuilderMaster {
 
     public static void main(String[] args) {
         BuilderMaster master = new BuilderMaster();
-        master.generateClassCode(User.class);
+        master.generateClassCode(Account.class);
     }
 }
