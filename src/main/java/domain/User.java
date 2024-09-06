@@ -28,11 +28,20 @@ public class User {
         if(email == null || email.isEmpty()) throw new ValidationException("Email cannot be null or empty");
         if(password == null || password.isEmpty()) throw new ValidationException("Password cannot be null or empty");
 
-
         this.id = id;
         this.username = username;
         this.email = email;
         this.password = password;
+    }
+
+    @Override
+    public String toString() {
+        return "User{" +
+                "id=" + id +
+                ", username='" + username + '\'' +
+                ", email='" + email + '\'' +
+                ", password='" + password + '\'' +
+                '}';
     }
 
     public Long getId() {
