@@ -49,7 +49,7 @@ public class UserServiceTest {
     }
 
     @Test
-    public void shuldRejectExistentUser(){
+    public void shouldRejectExistentUser(){
      User userToSave = UserBuilder.oneUser().withId(null).readyToUse();
 
      Mockito.when(repository.getUserByMail(userToSave.getEmail()))
