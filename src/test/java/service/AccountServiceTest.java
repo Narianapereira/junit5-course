@@ -2,6 +2,7 @@ package service;
 
 import domain.Account;
 import domain.builders.AccountBuilder;
+import domain.exceptions.EventException;
 import domain.exceptions.ValidationException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -10,6 +11,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import service.external.AccountEvent;
 import service.repository.AccountRepository;
 
 import java.util.ArrayList;
@@ -22,6 +24,8 @@ public class AccountServiceTest {
 
     @Mock
     AccountRepository accountRepository;
+    @Mock
+    private AccountEvent event;
     @InjectMocks
     AccountService accountService;
 
@@ -48,7 +52,8 @@ public class AccountServiceTest {
         Account accountToSave = AccountBuilder.oneAccount().readyToUse();
         Mockito.when(accountService.findByUser(1L)).thenReturn(new ArrayList<>());
         Mockito.when(accountRepository.save(Mockito.any(Account.class))).thenReturn(AccountBuilder.oneAccount().readyToUse());
-
+        Mockito.doNothing().when(event).dispatch(AccountBuilder.oneAccount().readyToUse(),
+                    AccountEvent.EventType.CREATED);
         Account savedAccount = accountService.save(accountToSave);
 
         Assertions.assertNotNull(savedAccount);
@@ -61,6 +66,8 @@ public class AccountServiceTest {
         Mockito.when(accountRepository.findByUser(1L)).
                 thenReturn(Arrays.asList(AccountBuilder.oneAccount().readyToUse()));
         Mockito.when(accountRepository.save(accountToSave)).thenReturn(AccountBuilder.oneAccount().readyToUse());
+        Mockito.doNothing().when(event).dispatch(AccountBuilder.oneAccount().readyToUse(),
+                AccountEvent.EventType.CREATED);
 
         Account savedAccount = accountService.save(accountToSave);
         Assertions.assertNotNull(savedAccount);
@@ -78,5 +85,20 @@ public class AccountServiceTest {
                 ()-> accountService.save(accountToSave));
         Assertions.assertTrue(exception.getMessage().contains("already exists"));
         Mockito.verify(accountRepository, Mockito.never()).save(accountToSave);
+    }
+
+    @Test
+    public void shouldThrowIfEventFails() {
+        Account accountToSave = AccountBuilder.oneAccount().readyToUse();
+        Mockito.when(accountRepository.findByUser(1L)).thenReturn(new ArrayList<>());
+        Mockito.when(accountRepository.save(Mockito.any(Account.class))).thenReturn(AccountBuilder.oneAccount().readyToUse());
+        Mockito.doThrow(new RuntimeException("Error"))
+                .when(event).dispatch(AccountBuilder.oneAccount().readyToUse(),
+                AccountEvent.EventType.CREATED);
+
+        EventException exception = Assertions.assertThrows(EventException.class,
+                () -> accountService.save(accountToSave));
+        Assertions.assertEquals("Error while dispatching event", exception.getMessage());
+        Mockito.verify(accountRepository).delete(accountToSave);
     }
 }
