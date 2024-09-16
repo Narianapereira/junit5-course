@@ -7,9 +7,7 @@ import domain.exceptions.ValidationException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Mockito;
+import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 import service.external.AccountEvent;
 import service.repository.AccountRepository;
@@ -28,6 +26,7 @@ public class AccountServiceTest {
     private AccountEvent event;
     @InjectMocks
     AccountService accountService;
+    @Captor private ArgumentCaptor<Account> accountCaptor;
 
     @Test
     public void shouldReturnEmptyIfUserAccountDoesNotExist() {
@@ -65,11 +64,13 @@ public class AccountServiceTest {
         Account accountToSave = AccountBuilder.oneAccount().withName("Account 2").readyToUse();
         Mockito.when(accountRepository.findByUser(1L)).
                 thenReturn(Arrays.asList(AccountBuilder.oneAccount().readyToUse()));
-        Mockito.when(accountRepository.save(accountToSave)).thenReturn(AccountBuilder.oneAccount().readyToUse());
+        Mockito.when(accountRepository.save(Mockito.any(Account.class))).thenReturn(AccountBuilder.oneAccount().readyToUse());
         Mockito.doNothing().when(event).dispatch(AccountBuilder.oneAccount().readyToUse(),
                 AccountEvent.EventType.CREATED);
 
         Account savedAccount = accountService.save(accountToSave);
+        Mockito.verify(accountRepository).save(accountCaptor.capture());
+        Assertions.assertEquals("Account 2", accountCaptor.getValue().getName());
         Assertions.assertNotNull(savedAccount);
         Mockito.verify(accountRepository).findByUser(1L);
     }

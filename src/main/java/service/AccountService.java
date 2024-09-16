@@ -6,6 +6,7 @@ import domain.exceptions.ValidationException;
 import service.external.AccountEvent;
 import service.repository.AccountRepository;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -21,11 +22,13 @@ public class AccountService {
 
     public Account save(Account account) {
         List<Account> accountList = accountRepository.findByUser(account.getUser().getId());
-        boolean userExists = accountList.stream().anyMatch(acc -> acc.getName().equals(account.getName()));
-        if (userExists) {
+        boolean userHasAccount = accountList.stream().anyMatch(acc -> acc.getName().equals(account.getName()));
+        if (userHasAccount) {
             throw new ValidationException("Account already exists for this user");
         }
-        Account savedAccount = accountRepository.save(account);
+        Account savedAccount = accountRepository.save(
+                new Account(account.getId(), account.getName(), account.getUser())
+        );
         try{
             event.dispatch(savedAccount, AccountEvent.EventType.CREATED);
         } catch (Exception e) {
