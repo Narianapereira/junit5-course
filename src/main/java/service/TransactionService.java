@@ -14,14 +14,18 @@ public class TransactionService {
     private ClockService clockService;
 
     public Transaction save(Transaction transaction) {
-        if(clockService.getCurrentTime().getHour() > 6) throw new RuntimeException("Try again tomorrow");
+        if(clockService.getCurrentTime().getHour() > 22) throw new RuntimeException("Try again tomorrow");
 
+        validarTransactionFields(transaction);
+
+        return dao.save(transaction);
+    }
+
+    private void validarTransactionFields(Transaction transaction) {
         if(transaction.getDescription() == null) throw new ValidationException("Transaction description is required");
         if(transaction.getAmount() == null) throw new ValidationException("Transaction amount is required");
         if(transaction.getDate() == null) throw new ValidationException("Transaction date is required");
         if(transaction.getAccount() == null) throw new ValidationException("Transaction account is required");
         if(transaction.getStatus() == null) transaction.setStatus(false);
-
-        return dao.save(transaction);
     }
 }

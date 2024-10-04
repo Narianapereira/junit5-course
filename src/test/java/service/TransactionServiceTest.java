@@ -12,9 +12,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Mockito;
+import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 import service.external.ClockService;
 import service.repository.TransactionDAO;
@@ -28,6 +26,7 @@ public class TransactionServiceTest {
     @InjectMocks private TransactionService transactionService;
     @Mock private TransactionDAO transactionDAO;
     @Mock private ClockService clockService;
+    @Captor private ArgumentCaptor<Transaction> captor;
 
     @BeforeEach
     public void setUp() {
@@ -60,6 +59,31 @@ public class TransactionServiceTest {
         Assertions.assertEquals(message, error);
 
     }
+
+    @Test
+    public void shouldRejectLateNightTransaction() {
+        Mockito.when(clockService.getCurrentTime())
+                .thenReturn(LocalDateTime.of(2024, 1, 1, 23, 0));
+        String error = Assertions.assertThrows(RuntimeException.class, () -> {
+            Transaction toSave = TransactionBuilder.oneTransaction().readyToUse();
+            transactionService.save(toSave);
+        }).getMessage();
+        Assertions.assertEquals("Try again tomorrow", error);
+
+    }
+
+    @Test
+    public void shouldSetFalseOnNullStatus() {
+        Transaction toSave = TransactionBuilder.oneTransaction().withStatus(null).readyToUse();
+        transactionService.save(toSave);
+
+        Mockito.verify(transactionDAO).save(captor.capture());
+        Transaction captured = captor.getValue();
+        Assertions.assertFalse(captured.getStatus());
+
+    }
+
+
     public static Stream<Arguments> mandatoryFields() {
         return Stream.of(
                 Arguments.of(1L, null, 500L, LocalDate.now(), AccountBuilder.oneAccount().readyToUse(), true, "Transaction description is required"),
@@ -67,6 +91,5 @@ public class TransactionServiceTest {
                 Arguments.of(1L, "Transaction Description", null, LocalDate.now(), AccountBuilder.oneAccount().readyToUse(), true, "Transaction amount is required"),
                 Arguments.of(1L, "Transaction Description", 500L, LocalDate.now(), null, true, "Transaction account is required")
         );
-
     }
 }
