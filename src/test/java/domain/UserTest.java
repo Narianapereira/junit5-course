@@ -11,7 +11,7 @@ import org.junit.jupiter.params.provider.CsvFileSource;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @DisplayName("Domain: User")
-class UserTest {
+public class UserTest {
 
     @Test
     @DisplayName("Should create a valid user")

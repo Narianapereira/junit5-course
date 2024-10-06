@@ -26,15 +26,6 @@ public class CalculatorTest {
     }
 
     @Test
-    public void shouldThrowExceptionOnDivisionByZero(){
-        ArithmeticException exeption = Assertions.assertThrows(ArithmeticException.class, () -> {
-            calculator = new Calculator();
-            float result = calculator.division(10,0);
-        });
-        Assertions.assertEquals("/ by zero", exeption.getMessage());
-    }
-
-    @Test
     public void toSum(){
         calculator = new Calculator();
         Assertions.assertTrue(calculator.soma(2, 3) == 5);

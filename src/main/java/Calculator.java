@@ -5,7 +5,7 @@ public class Calculator {
     }
 
     public float division(int a, int b){
-        return a / b;
+        return (float) a / b;
     }
 
     public static void main(String[] args) {
